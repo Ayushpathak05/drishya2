@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Heart, MessageCircle, Briefcase, Users, BarChart2, Plus, X, Clock, CheckCircle2, GraduationCap, Music, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '@/lib/api';
 
 // ─── Trend of the Day ─────────────────────────────────────────────────────────
 const extractHashtags = (posts) => {
@@ -110,7 +111,7 @@ const CreatePollModal = ({ onClose, onCreate, college }) => {
         }
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:3000/api/v1/poll/create', {
+            const res = await axios.post('${API_BASE_URL}/api/v1/poll/create', {
                 question: question.trim(),
                 options: options.filter(o => o.trim()),
                 isAnonymous,
@@ -209,7 +210,7 @@ const CampusPage = () => {
     const fetchCampusPosts = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:3000/api/v1/user/campus/posts', { withCredentials: true });
+            const res = await axios.get('${API_BASE_URL}/api/v1/user/campus/posts', { withCredentials: true });
             if (res.data.success) {
                 setPosts(res.data.posts);
                 setTrendTags(extractHashtags(res.data.posts));
@@ -220,14 +221,14 @@ const CampusPage = () => {
 
     const fetchPolls = useCallback(async () => {
         try {
-            const res = await axios.get(`http://localhost:3000/api/v1/poll?college=${encodeURIComponent(user?.college || '')}`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/poll?college=${encodeURIComponent(user?.college || '')}`, { withCredentials: true });
             if (res.data.success) setPolls(res.data.polls);
         } catch (e) { console.error(e); }
     }, [user?.college]);
 
     const fetchOpenToWork = useCallback(async () => {
         try {
-            const res = await axios.get('http://localhost:3000/api/v1/user/suggested', { withCredentials: true });
+            const res = await axios.get('${API_BASE_URL}/api/v1/user/suggested', { withCredentials: true });
             if (res.data.success) setOpenToWorkUsers(res.data.users.filter(u => u.openToWork));
         } catch (e) { console.error(e); }
     }, []);
@@ -235,7 +236,7 @@ const CampusPage = () => {
     const fetchCampusReels = useCallback(async () => {
         setReelsLoading(true);
         try {
-            const res = await axios.get('http://localhost:3000/api/v1/user/campus/reels', { withCredentials: true });
+            const res = await axios.get('${API_BASE_URL}/api/v1/user/campus/reels', { withCredentials: true });
             if (res.data.success) setCampusReels(res.data.reels);
         } catch (e) { console.error(e); }
         finally { setReelsLoading(false); }
@@ -256,7 +257,7 @@ const CampusPage = () => {
 
     const handleVote = async (pollId, optionIndex) => {
         try {
-            const res = await axios.post('http://localhost:3000/api/v1/poll/vote', { pollId, optionIndex }, { withCredentials: true });
+            const res = await axios.post('${API_BASE_URL}/api/v1/poll/vote', { pollId, optionIndex }, { withCredentials: true });
             if (res.data.success) setPolls(prev => prev.map(p => p._id === pollId ? res.data.poll : p));
         } catch { toast.error('Vote failed'); }
     };

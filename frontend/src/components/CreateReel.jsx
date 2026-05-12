@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { X, Film, Loader2, Music, Globe, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/lib/api';
 
 const LANGUAGES = ['English', 'Hindi', 'Tamil', 'Telugu', 'Marathi', 'Bengali'];
 const MOODS = [
@@ -101,7 +102,7 @@ const CreateReel = ({ onClose, onReelCreated }) => {
             formData.append('musicTitle', musicTitle || 'Original Audio');
 
             const res = await axios.post(
-                'http://localhost:3000/api/v1/reel/upload',
+                '${API_BASE_URL}/api/v1/reel/upload',
                 formData,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
@@ -117,12 +118,12 @@ const CreateReel = ({ onClose, onReelCreated }) => {
                 toast.success('Reel uploaded successfully! 🎬');
                 // Silently auto-complete any matching reel challenge
                 try {
-                    const cRes = await axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true });
+                    const cRes = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
                     if (cRes.data.success) {
                         const reelChallenges = cRes.data.challenges.filter(c => c.type === 'reel' && !c.completed);
                         for (const ch of reelChallenges) {
                             if (!ch.requiredTag || finalCaption.toLowerCase().includes(ch.requiredTag.toLowerCase())) {
-                                axios.post(`http://localhost:3000/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
+                                axios.post(`${API_BASE_URL}/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
                             }
                         }
                     }

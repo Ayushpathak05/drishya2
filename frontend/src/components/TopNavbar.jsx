@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import logo from '../assets/project icon.png';
 import axios from 'axios';
 import { setLikeNotification } from '@/redux/rtnSlice';
+import { API_BASE_URL } from '@/lib/api';
 
 const TopNavbar = () => {
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ const TopNavbar = () => {
 
     const fetchNotifications = async () => {
         try {
-            const res = await axios.get("http://localhost:3000/api/v1/notification", { withCredentials: true });
+            const res = await axios.get("${API_BASE_URL}/api/v1/notification", { withCredentials: true });
             if (res.data.success) {
                 // map DB notifications to state logic
                 const formatted = res.data.notifications.map(n => ({
@@ -57,7 +58,7 @@ const TopNavbar = () => {
 
     const handleReadNotifications = async () => {
         try {
-            await axios.post("http://localhost:3000/api/v1/notification/read", {}, { withCredentials: true });
+            await axios.post("${API_BASE_URL}/api/v1/notification/read", {}, { withCredentials: true });
         } catch (error) {
             console.log(error);
         }

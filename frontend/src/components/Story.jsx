@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Heart, MessageCircle, X, Eye } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { API_BASE_URL } from '@/lib/api';
 
 const Story = ({ story, onClose, onNext, onPrev, isFirst, isLast }) => {
     const [isLiked, setIsLiked] = useState(false)
@@ -24,7 +25,7 @@ const Story = ({ story, onClose, onNext, onPrev, isFirst, isLast }) => {
 
     const markAsViewed = async () => {
         try {
-            await axios.post(`http://localhost:3000/api/v1/story/${story._id}/view`, {}, {
+            await axios.post(`${API_BASE_URL}/api/v1/story/${story._id}/view`, {}, {
                 withCredentials: true
             })
         } catch (error) {
@@ -37,7 +38,7 @@ const Story = ({ story, onClose, onNext, onPrev, isFirst, isLast }) => {
 
         setLoading(true)
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/story/${story._id}/like`, {}, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/story/${story._id}/like`, {}, {
                 withCredentials: true
             })
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+﻿import React, { useState, useRef } from 'react'
 import { X, Image, Plus } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import { toast } from 'sonner'
 import ImageCropper from './ImageCropper'
+import { API_BASE_URL } from '@/lib/api';
 
 const CreateStory = ({ onClose, onStoryCreated }) => {
     const [selectedFile, setSelectedFile] = useState(null)
@@ -63,7 +64,7 @@ const CreateStory = ({ onClose, onStoryCreated }) => {
                 formData.append('caption', caption.trim())
             }
 
-            const res = await axios.post('http://localhost:3000/api/v1/story/create', formData, {
+            const res = await axios.post('${API_BASE_URL}/api/v1/story/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },

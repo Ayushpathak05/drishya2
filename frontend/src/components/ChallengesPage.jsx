@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { CheckCircle2, Zap, Trophy, Lock } from 'lucide-react';
 import { setAuthUser } from '@/redux/authSlice';
+import { API_BASE_URL } from '@/lib/api';
 
 const LEVEL_NAMES = ['Rookie', 'Explorer', 'Builder', 'Hustler', 'Achiever', 'Elite', 'Master', 'Champion', 'Legend', 'GOAT'];
 const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 4000, 7000, 11000, 16000];
@@ -50,7 +51,7 @@ const ChallengeCard = ({ challenge, onComplete }) => {
         setLoading(true);
         try {
             const res = await axios.post(
-                `http://localhost:3000/api/v1/challenge/${challenge._id}/complete`,
+                `${API_BASE_URL}/api/v1/challenge/${challenge._id}/complete`,
                 {},
                 { withCredentials: true }
             );
@@ -127,7 +128,7 @@ const ChallengesPage = () => {
 
     const fetchChallenges = useCallback(async () => {
         try {
-            const res = await axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true });
+            const res = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
             if (res.data.success) setChallenges(res.data.challenges);
         } catch (e) { console.error(e); toast.error('Failed to load challenges'); }
         finally { setLoading(false); }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Bookmark, MessageCircle, MoreHorizontal, Send } from 'lucide-react'
@@ -10,6 +10,7 @@ import axios from 'axios'
 import { toast } from 'sonner'
 import { setPosts, setSelectedPost } from '@/redux/postSlice'
 import { Badge } from './ui/badge'
+import { API_BASE_URL } from '@/lib/api';
 
 const Post = ({ post }) => {
     if (!post || !post._id) {
@@ -40,7 +41,7 @@ const Post = ({ post }) => {
     const likeOrDislikeHandler = async () => {
         try {
             const action = liked ? 'dislike' : 'like';
-            const res = await axios.get(`http://localhost:3000/api/v1/post/${post._id}/${action}`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/post/${post._id}/${action}`, { withCredentials: true });
             console.log(res.data);
             if (res.data.success) {
                 const updatedLikes = liked ? postLike - 1 : postLike + 1;
@@ -64,7 +65,7 @@ const Post = ({ post }) => {
 
     const followToggleHandler = async () => {
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/user/followorunfollow/${post?.author?._id}`, {}, { withCredentials: true });
+            const res = await axios.post(`${API_BASE_URL}/api/v1/user/followorunfollow/${post?.author?._id}`, {}, { withCredentials: true });
             if (res.data.success) {
                 setIsFollowing(!isFollowing);
                 toast.success(res.data.message);
@@ -86,7 +87,7 @@ const Post = ({ post }) => {
     const commentHandler = async () => {
 
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/post/${post._id}/comment`, { text }, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/post/${post._id}/comment`, { text }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -112,7 +113,7 @@ const Post = ({ post }) => {
 
     const deletePostHandler = async () => {
         try {
-            const res = await axios.delete(`http://localhost:3000/api/v1/post/delete/${post?._id}`, { withCredentials: true })
+            const res = await axios.delete(`${API_BASE_URL}/api/v1/post/delete/${post?._id}`, { withCredentials: true })
             if (res.data.success) {
                 const updatedPostData = posts.filter((postItem) => postItem?._id !== post?._id);
                 dispatch(setPosts(updatedPostData));
@@ -128,7 +129,7 @@ const Post = ({ post }) => {
         try {
             // Optimistic update
             setIsBookmarked(!isBookmarked);
-            const res = await axios.get(`http://localhost:3000/api/v1/post/${post?._id}/bookmark`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/post/${post?._id}/bookmark`, { withCredentials: true });
             if (res.data.success) {
                 toast.success(res.data.message);
             } else {

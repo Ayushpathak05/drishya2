@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { setSelectedUser } from '@/redux/authSlice';
@@ -9,6 +9,7 @@ import Messages from './Messages';
 import axios from 'axios';
 import { setMessages } from '@/redux/chatSlice';
 import { initiateCall } from '@/redux/callSlice';
+import { API_BASE_URL } from '@/lib/api';
 
 const ChatPage = () => {
     const [textMessage, setTextMessage] = useState("");
@@ -18,7 +19,7 @@ const ChatPage = () => {
 
     const sendMessageHandler = async (receiverId) => {
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/message/send/${receiverId}`, { textMessage }, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/message/send/${receiverId}`, { textMessage }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

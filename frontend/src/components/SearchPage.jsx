@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Search } from 'lucide-react'
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { API_BASE_URL } from '@/lib/api';
 
 const SearchPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
@@ -23,7 +24,7 @@ const SearchPage = () => {
 
         setLoading(true)
         try {
-            const res = await axios.get(`http://localhost:3000/api/v1/user/search?query=${encodeURIComponent(searchTerm)}`, {
+            const res = await axios.get(`${API_BASE_URL}/api/v1/user/search?query=${encodeURIComponent(searchTerm)}`, {
                 withCredentials: true
             })
 

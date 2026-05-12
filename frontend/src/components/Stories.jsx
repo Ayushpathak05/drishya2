@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Plus } from 'lucide-react'
 import { useSelector } from 'react-redux'
@@ -6,6 +6,7 @@ import axios from 'axios'
 import { toast } from 'sonner'
 import StoryViewer from './StoryViewer'
 import CreateStory from './CreateStory'
+import { API_BASE_URL } from '@/lib/api';
 
 const Stories = () => {
     const [stories, setStories] = useState([])
@@ -20,7 +21,7 @@ const Stories = () => {
 
     const fetchStories = async () => {
         try {
-            const res = await axios.get('http://localhost:3000/api/v1/story', {
+            const res = await axios.get('${API_BASE_URL}/api/v1/story', {
                 withCredentials: true
             })
 

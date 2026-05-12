@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import useGetUserProfile from '@/hooks/useGetUserProfile';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { AtSign, Heart, MessageCircle, Film, Play, Zap, Trophy } from 'lucide-re
 import axios from 'axios';
 import { toast } from 'sonner';
 import { setUserProfile } from '@/redux/authSlice';
+import { API_BASE_URL } from '@/lib/api';
 
 const LEVEL_NAMES = ['Rookie', 'Explorer', 'Builder', 'Hustler', 'Achiever', 'Elite', 'Master', 'Champion', 'Legend', 'GOAT'];
 const LEVEL_ICONS = ['🌱', '🚀', '🔨', '💪', '🏅', '⚡', '🎯', '🏆', '💎', '👑'];
@@ -59,7 +60,7 @@ const Profile = () => {
     useEffect(() => {
         if (activeTab === 'reels' && userId) {
             setReelsLoading(true);
-            axios.get(`http://localhost:3000/api/v1/reel/user/${userId}`, { withCredentials: true })
+            axios.get(`${API_BASE_URL}/api/v1/reel/user/${userId}`, { withCredentials: true })
                 .then(res => { if (res.data.success) setUserReels(res.data.reels); })
                 .catch(err => console.error(err))
                 .finally(() => setReelsLoading(false));
@@ -68,7 +69,7 @@ const Profile = () => {
 
     const followHandler = async () => {
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/user/followorunfollow/${userId}`, {}, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/user/followorunfollow/${userId}`, {}, {
                 headers: { 'Content-Type': 'application/json' },
                 withCredentials: true
             });

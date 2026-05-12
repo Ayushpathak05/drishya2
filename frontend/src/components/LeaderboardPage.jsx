@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Trophy, Medal, Zap, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '@/lib/api';
 
 const LEVEL_NAMES = ['Rookie', 'Explorer', 'Builder', 'Hustler', 'Achiever', 'Elite', 'Master', 'Champion', 'Legend', 'GOAT'];
 const LEVEL_ICONS = ['🌱', '🚀', '🔨', '💪', '🏅', '⚡', '🎯', '🏆', '💎', '👑'];
@@ -22,7 +23,7 @@ const LeaderboardPage = () => {
         try {
             const college = filter === 'college' && user?.college ? user.college : '';
             const res = await axios.get(
-                `http://localhost:3000/api/v1/challenge/leaderboard?college=${encodeURIComponent(college)}`,
+                `${API_BASE_URL}/api/v1/challenge/leaderboard?college=${encodeURIComponent(college)}`,
                 { withCredentials: true }
             );
             if (res.data.success) setUsers(res.data.users);

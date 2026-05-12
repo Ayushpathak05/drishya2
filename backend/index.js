@@ -25,9 +25,24 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
+const allowedOrigins = [
+    process.env.URL,                         // from .env (localhost dev or Vercel prod)
+    'http://localhost:5173',                 // Vite local dev
+    'http://localhost:3000',                 // fallback
+    'https://drishya2.vercel.app',           // Vercel production — update if your domain differs
+].filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.URL,
-    credentials: true
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS: ${origin} not allowed`));
+        }
+    },
+    credentials: true,
 }
 app.use(cors(corsOptions));
 

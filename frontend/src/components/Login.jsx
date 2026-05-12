@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import axios from 'axios';
@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAuthUser } from '@/redux/authSlice';
 import logo from '../assets/project icon.png';
+import { API_BASE_URL } from '@/lib/api';
 
 const Login = () => {
     const [input, setInput] = useState({
@@ -27,7 +28,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await axios.post('http://localhost:3000/api/v1/user/login', input, {
+            const res = await axios.post('${API_BASE_URL}/api/v1/user/login', input, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

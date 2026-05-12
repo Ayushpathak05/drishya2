@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+﻿import React, { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Link } from 'react-router-dom'
@@ -9,6 +9,7 @@ import Comment from './Comment'
 import axios from 'axios'
 import { toast } from 'sonner'
 import { setPosts } from '@/redux/postSlice'
+import { API_BASE_URL } from '@/lib/api';
 
 const CommentDialog = ({ open, setOpen }) => {
   const [text, setText] = useState("");
@@ -34,7 +35,7 @@ const CommentDialog = ({ open, setOpen }) => {
   const sendMessageHandler = async () => {
 
     try {
-      const res = await axios.post(`http://localhost:3000/api/v1/post/${selectedPost?._id}/comment`, { text }, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/post/${selectedPost?._id}/comment`, { text }, {
         headers: {
           'Content-Type': 'application/json'
         },

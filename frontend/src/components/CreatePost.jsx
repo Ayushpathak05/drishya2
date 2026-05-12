@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+﻿import React, { useRef, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader } from './ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Textarea } from './ui/textarea';
@@ -12,6 +12,7 @@ import { setPosts } from '@/redux/postSlice';
 import { useNavigate } from 'react-router-dom';
 import ReactCrop, { centerCrop, makeAspectCrop, convertToPixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { API_BASE_URL } from '@/lib/api';
 
 const MOODS = [
   { emoji: '🔥', label: 'Lit' },
@@ -138,7 +139,7 @@ const CreatePost = ({ open, setOpen }) => {
     
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:3000/api/v1/post/addpost', formData, {
+      const res = await axios.post('${API_BASE_URL}/api/v1/post/addpost', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -151,12 +152,12 @@ const CreatePost = ({ open, setOpen }) => {
         navigate('/');
         // Silently try to auto-complete any matching post challenge
         try {
-          const cRes = await axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true });
+          const cRes = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
           if (cRes.data.success) {
             const postChallenges = cRes.data.challenges.filter(c => c.type === 'post' && !c.completed);
             for (const ch of postChallenges) {
               if (!ch.requiredTag || caption.toLowerCase().includes(ch.requiredTag.toLowerCase())) {
-                axios.post(`http://localhost:3000/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
+                axios.post(`${API_BASE_URL}/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
               }
             }
           }

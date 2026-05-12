@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Heart, MessageCircle, Send, MoreVertical, Music, X, Plus, Loader2, Bookmark, Share2 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setReels, updateReelLike, addReelComment } from '@/redux/reelSlice';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import CreateReel from './CreateReel';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { API_BASE_URL } from '@/lib/api';
 
 // Campus tags — reels with these stay in Campus section only
 const CAMPUS_TAGS = [
@@ -33,7 +34,7 @@ const CommentSheet = ({ reel, onClose, onAddComment }) => {
         setLoading(true);
         try {
             const res = await axios.post(
-                `http://localhost:3000/api/v1/reel/${reel._id}/comment`,
+                `${API_BASE_URL}/api/v1/reel/${reel._id}/comment`,
                 { text },
                 { withCredentials: true }
             );
@@ -168,7 +169,7 @@ const ReelCard = ({ reel, isActive }) => {
     const likeHandler = async () => {
         try {
             const action = liked ? 'dislike' : 'like';
-            const res = await axios.get(`http://localhost:3000/api/v1/reel/${reel._id}/${action}`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/reel/${reel._id}/${action}`, { withCredentials: true });
             if (res.data.success) {
                 dispatch(updateReelLike({ reelId: reel._id, userId: user._id, liked }));
                 setLiked(!liked);
@@ -331,7 +332,7 @@ const ReelsPage = () => {
         try {
             setLoading(true);
             const res = await axios.get(
-                `http://localhost:3000/api/v1/reel/all?lang=${langPref}`,
+                `${API_BASE_URL}/api/v1/reel/all?lang=${langPref}`,
                 { withCredentials: true }
             );
             if (res.data.success) {

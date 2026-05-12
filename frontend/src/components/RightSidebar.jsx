@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { setAppMode } from '@/redux/authSlice';
 import SuggestedUsers from './SuggestedUsers';
 import { Zap, Trophy, GraduationCap } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 
 const LEVEL_NAMES = ['Rookie', 'Explorer', 'Builder', 'Hustler', 'Achiever', 'Elite', 'Master', 'Champion', 'Legend', 'GOAT'];
 const LEVEL_ICONS = ['🌱', '🚀', '🔨', '💪', '🏅', '⚡', '🎯', '🏆', '💎', '👑'];
@@ -18,7 +19,7 @@ const RightSidebar = () => {
     const [todayChallenge, setTodayChallenge] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true })
+        axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true })
             .then(res => {
                 if (res.data.success) {
                     const unfinished = res.data.challenges.find(c => !c.completed);

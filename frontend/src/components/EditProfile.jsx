@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+﻿import React, { useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button } from './ui/button';
@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { setAuthUser } from '@/redux/authSlice';
 import ImageCropper from './ImageCropper';
+import { API_BASE_URL } from '@/lib/api';
 
 const POPULAR_COLLEGES = [
     'IIT Bombay', 'IIT Delhi', 'IIT Madras', 'IIT Kanpur', 'IIT Kharagpur',
@@ -67,7 +68,7 @@ const EditProfile = () => {
 
         try {
             setLoading(true);
-            const res = await axios.post('http://localhost:3000/api/v1/user/profile/edit', formData, {
+            const res = await axios.post('${API_BASE_URL}/api/v1/user/profile/edit', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
             });

@@ -1,10 +1,11 @@
-import React from 'react'
+﻿import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { setSuggestedUsers } from '@/redux/authSlice';
+import { API_BASE_URL } from '@/lib/api';
 
 const SuggestedUsers = () => {
     const { suggestedUsers, user } = useSelector(store => store.auth);
@@ -12,7 +13,7 @@ const SuggestedUsers = () => {
 
     const followHandler = async (userId) => {
         try {
-            const res = await axios.post(`http://localhost:3000/api/v1/user/followorunfollow/${userId}`, {}, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/user/followorunfollow/${userId}`, {}, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

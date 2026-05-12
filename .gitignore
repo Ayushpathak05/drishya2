@@ -1,2 +1,5 @@
 node_modules
 .env
+backend/.env
+frontend/.env
+patch_urls.ps1
