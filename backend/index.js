@@ -1,5 +1,4 @@
 import express, { urlencoded } from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
@@ -21,32 +20,31 @@ const PORT = process.env.PORT || 3000;
 
 const __dirname = path.resolve();
 
-//middlewares
+// ─── CORS — handle preflight and all cross-origin requests ───────────────────
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    // Allow any vercel.app subdomain OR localhost
+    const isAllowed = !origin
+        || origin.endsWith('.vercel.app')
+        || origin.startsWith('http://localhost');
+
+    if (isAllowed && origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With');
+    }
+
+    // Answer preflight immediately
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+    next();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
-const allowedOrigins = [
-    process.env.URL,                         // from Render env vars (set to your Vercel URL)
-    'http://localhost:5173',                 // Vite local dev
-    'http://localhost:3000',                 // fallback
-    'https://drishya-mu.vercel.app',         // Vercel production
-].filter(Boolean);
-
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, Postman)
-        if (!origin) return callback(null, true);
-        // Allow any *.vercel.app subdomain (covers preview & production deployments)
-        if (origin.endsWith('.vercel.app')) return callback(null, true);
-        // Allow exact matches in the list
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        // Block everything else
-        console.warn(`CORS blocked: ${origin}`);
-        callback(new Error(`CORS: ${origin} not allowed`));
-    },
-    credentials: true,
-}
-app.use(cors(corsOptions));
 
 // yha pr apni api ayengi
 app.use("/api/v1/user", userRoute);
