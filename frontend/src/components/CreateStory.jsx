@@ -64,7 +64,7 @@ const CreateStory = ({ onClose, onStoryCreated }) => {
                 formData.append('caption', caption.trim())
             }
 
-            const res = await axios.post('${API_BASE_URL}/api/v1/story/create', formData, {
+            const res = await axios.post(`${API_BASE_URL}/api/v1/story/create`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },

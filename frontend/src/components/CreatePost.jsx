@@ -139,7 +139,7 @@ const CreatePost = ({ open, setOpen }) => {
     
     try {
       setLoading(true);
-      const res = await axios.post('${API_BASE_URL}/api/v1/post/addpost', formData, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/post/addpost`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -152,7 +152,7 @@ const CreatePost = ({ open, setOpen }) => {
         navigate('/');
         // Silently try to auto-complete any matching post challenge
         try {
-          const cRes = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
+          const cRes = await axios.get(`${API_BASE_URL}/api/v1/challenge`, { withCredentials: true });
           if (cRes.data.success) {
             const postChallenges = cRes.data.challenges.filter(c => c.type === 'post' && !c.completed);
             for (const ch of postChallenges) {

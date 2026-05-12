@@ -29,7 +29,7 @@ const TopNavbar = () => {
 
     const fetchNotifications = async () => {
         try {
-            const res = await axios.get("${API_BASE_URL}/api/v1/notification", { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/notification`, { withCredentials: true });
             if (res.data.success) {
                 // map DB notifications to state logic
                 const formatted = res.data.notifications.map(n => ({
@@ -58,7 +58,7 @@ const TopNavbar = () => {
 
     const handleReadNotifications = async () => {
         try {
-            await axios.post("${API_BASE_URL}/api/v1/notification/read", {}, { withCredentials: true });
+            await axios.post(`${API_BASE_URL}/api/v1/notification/read`, {}, { withCredentials: true });
         } catch (error) {
             console.log(error);
         }

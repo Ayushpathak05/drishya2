@@ -128,7 +128,7 @@ const ChallengesPage = () => {
 
     const fetchChallenges = useCallback(async () => {
         try {
-            const res = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/challenge`, { withCredentials: true });
             if (res.data.success) setChallenges(res.data.challenges);
         } catch (e) { console.error(e); toast.error('Failed to load challenges'); }
         finally { setLoading(false); }

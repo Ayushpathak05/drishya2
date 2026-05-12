@@ -21,7 +21,7 @@ const Stories = () => {
 
     const fetchStories = async () => {
         try {
-            const res = await axios.get('${API_BASE_URL}/api/v1/story', {
+            const res = await axios.get(`${API_BASE_URL}/api/v1/story`, {
                 withCredentials: true
             })
 

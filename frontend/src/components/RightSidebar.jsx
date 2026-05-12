@@ -19,7 +19,7 @@ const RightSidebar = () => {
     const [todayChallenge, setTodayChallenge] = useState(null);
 
     useEffect(() => {
-        axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true })
+        axios.get(`${API_BASE_URL}/api/v1/challenge`, { withCredentials: true })
             .then(res => {
                 if (res.data.success) {
                     const unfinished = res.data.challenges.find(c => !c.completed);

@@ -102,7 +102,7 @@ const CreateReel = ({ onClose, onReelCreated }) => {
             formData.append('musicTitle', musicTitle || 'Original Audio');
 
             const res = await axios.post(
-                '${API_BASE_URL}/api/v1/reel/upload',
+                `${API_BASE_URL}/api/v1/reel/upload`,
                 formData,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
@@ -118,7 +118,7 @@ const CreateReel = ({ onClose, onReelCreated }) => {
                 toast.success('Reel uploaded successfully! 🎬');
                 // Silently auto-complete any matching reel challenge
                 try {
-                    const cRes = await axios.get('${API_BASE_URL}/api/v1/challenge', { withCredentials: true });
+                    const cRes = await axios.get(`${API_BASE_URL}/api/v1/challenge`, { withCredentials: true });
                     if (cRes.data.success) {
                         const reelChallenges = cRes.data.challenges.filter(c => c.type === 'reel' && !c.completed);
                         for (const ch of reelChallenges) {

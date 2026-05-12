@@ -38,7 +38,7 @@ const LeftSidebar = () => {
 
     const handleReadNotifications = async () => {
         try {
-            await axios.post("${API_BASE_URL}/api/v1/notification/read", {}, { withCredentials: true });
+            await axios.post(`${API_BASE_URL}/api/v1/notification/read`, {}, { withCredentials: true });
         } catch (error) {
             console.log(error);
         }
@@ -46,7 +46,7 @@ const LeftSidebar = () => {
 
     const logoutHandler = async () => {
         try {
-            const res = await axios.get('${API_BASE_URL}/api/v1/user/logout', { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/api/v1/user/logout`, { withCredentials: true });
             if (res.data.success) {
                 dispatch(setAuthUser(null));
                 dispatch(setSelectedPost(null));
