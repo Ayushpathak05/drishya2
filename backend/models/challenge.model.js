@@ -9,6 +9,8 @@ const challengeSchema = new mongoose.Schema({
     active: { type: Boolean, default: true },
     expiresAt: { type: Date },
     completedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    // Tag required in caption to verify the challenge action was actually done
+    requiredTag: { type: String, default: '' },
 }, { timestamps: true });
 
 export const Challenge = mongoose.model('Challenge', challengeSchema);

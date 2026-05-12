@@ -149,6 +149,18 @@ const CreatePost = ({ open, setOpen }) => {
         toast.success(res.data.message);
         handleClose();
         navigate('/');
+        // Silently try to auto-complete any matching post challenge
+        try {
+          const cRes = await axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true });
+          if (cRes.data.success) {
+            const postChallenges = cRes.data.challenges.filter(c => c.type === 'post' && !c.completed);
+            for (const ch of postChallenges) {
+              if (!ch.requiredTag || caption.toLowerCase().includes(ch.requiredTag.toLowerCase())) {
+                axios.post(`http://localhost:3000/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
+              }
+            }
+          }
+        } catch (_) {}
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error occurred');

@@ -7,6 +7,20 @@ import useGetSuggestedUsers from '@/hooks/useGetSuggestedUsers'
 import { useSelector, useDispatch } from 'react-redux'
 import { setPosts } from '@/redux/postSlice'
 
+// Campus-relevant hashtags — posts with these tags only appear in Campus section
+const CAMPUS_TAGS = [
+    '#study','#campus','#college','#university','#exam','#exams',
+    '#notes','#lecture','#lectures','#internship','#career','#job',
+    '#jobs','#hackathon','#collaborate','#collab','#teammate',
+    '#placement','#project','#research','#assignment','#homework',
+    '#semester','#syllabus','#cgpa','#coding','#competitive','#dsa',
+    '#opentowork','#opportunity','#workshop','#fest','#techfest',
+];
+const isCampusPost = (caption = '') => {
+    const lower = caption.toLowerCase();
+    return CAMPUS_TAGS.some(tag => lower.includes(tag));
+};
+
 const Home = () => {
     useGetAllPost();
     useGetSuggestedUsers();
@@ -14,10 +28,12 @@ const Home = () => {
     const { appMode } = useSelector(store => store.auth);
     const isGrowthMode = appMode === 'growth';
 
-    // Growth mode: only show Inspiring / Chill mood posts
+    // Auto-filter by caption:
+    // For You  → posts WITHOUT campus/study tags (normal content)
+    // Growth   → posts WITH campus/study tags (study/career content)
     const filteredPosts = isGrowthMode
-        ? posts.filter(p => ['Inspiring', 'Chill'].includes(p.mood))
-        : posts;
+        ? posts.filter(p => isCampusPost(p.caption))
+        : posts.filter(p => !isCampusPost(p.caption));
 
     return (
         <div className='flex justify-center bg-neutral overflow-x-hidden w-full'>
@@ -34,10 +50,19 @@ const Home = () => {
                     </div>
                 )}
 
-                {isGrowthMode && filteredPosts.length === 0 && (
+                {filteredPosts.length === 0 && (
                     <div className="text-center py-8 text-[#A1A1B5] text-sm">
-                        <p>📈 No Growth posts yet!</p>
-                        <p className="text-xs mt-1">Post with mood <span className="text-green-400 font-semibold">Inspiring</span> or <span className="text-blue-400 font-semibold">Chill</span> to appear here.</p>
+                        {isGrowthMode ? (
+                            <>
+                                <p>📈 No campus posts yet!</p>
+                                <p className="text-xs mt-1">Post with tags like <span className="text-[#FF9933] font-semibold">#study</span>, <span className="text-[#FF9933] font-semibold">#campus</span>, <span className="text-[#FF9933] font-semibold">#exam</span> to appear here.</p>
+                            </>
+                        ) : (
+                            <>
+                                <p>🎉 No posts yet!</p>
+                                <p className="text-xs mt-1">Posts without campus tags will appear here.</p>
+                            </>
+                        )}
                     </div>
                 )}
 

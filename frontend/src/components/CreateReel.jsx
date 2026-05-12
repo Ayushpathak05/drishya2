@@ -22,6 +22,14 @@ const CAPTION_SUGGESTIONS = [
     'Just captured this 📸🎥 #explore #fyp #viral',
     'This one hits different 🔥 #content #creator #reels',
 ];
+const CAMPUS_CAPTION_SUGGESTIONS = [
+    'Study grind never stops 📚 #study #campus #college #exam',
+    'Notes day 🗒️ Semester is no joke #notes #lecture #cgpa',
+    'Hackathon ready! 💻 #hackathon #coding #campus #techfest',
+    'Internship season is here 🚀 #internship #career #placement #opportunity',
+    'Collab time — who wants in? 🤝 #collaborate #teammate #project #campus',
+    'Research mode activated 🔬 #research #college #study #assignment',
+];
 
 const CreateReel = ({ onClose, onReelCreated }) => {
     const { user } = useSelector(store => store.auth);
@@ -35,6 +43,7 @@ const CreateReel = ({ onClose, onReelCreated }) => {
     const [loading, setLoading] = useState(false);
     const [suggestingCaption, setSuggestingCaption] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [campusMode, setCampusMode] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleFileSelect = (e) => {
@@ -68,7 +77,8 @@ const CreateReel = ({ onClose, onReelCreated }) => {
     const handleSuggestCaption = () => {
         setSuggestingCaption(true);
         setTimeout(() => {
-            const rand = CAPTION_SUGGESTIONS[Math.floor(Math.random() * CAPTION_SUGGESTIONS.length)];
+            const pool = campusMode ? CAMPUS_CAPTION_SUGGESTIONS : CAPTION_SUGGESTIONS;
+            const rand = pool[Math.floor(Math.random() * pool.length)];
             setCaption(rand);
             setSuggestingCaption(false);
         }, 600);
@@ -81,7 +91,11 @@ const CreateReel = ({ onClose, onReelCreated }) => {
         try {
             const formData = new FormData();
             formData.append('video', videoFile);
-            formData.append('caption', caption);
+            // Auto-append campus tags when campus mode is on
+            const finalCaption = campusMode && !caption.toLowerCase().includes('#campus')
+                ? `${caption} #campus #study`.trim()
+                : caption;
+            formData.append('caption', finalCaption);
             formData.append('language', language);
             formData.append('mood', mood);
             formData.append('musicTitle', musicTitle || 'Original Audio');
@@ -101,6 +115,18 @@ const CreateReel = ({ onClose, onReelCreated }) => {
 
             if (res.data.success) {
                 toast.success('Reel uploaded successfully! 🎬');
+                // Silently auto-complete any matching reel challenge
+                try {
+                    const cRes = await axios.get('http://localhost:3000/api/v1/challenge', { withCredentials: true });
+                    if (cRes.data.success) {
+                        const reelChallenges = cRes.data.challenges.filter(c => c.type === 'reel' && !c.completed);
+                        for (const ch of reelChallenges) {
+                            if (!ch.requiredTag || finalCaption.toLowerCase().includes(ch.requiredTag.toLowerCase())) {
+                                axios.post(`http://localhost:3000/api/v1/challenge/${ch._id}/complete`, {}, { withCredentials: true }).catch(() => {});
+                            }
+                        }
+                    }
+                } catch (_) {}
                 onReelCreated?.();
             }
         } catch (error) {
@@ -262,6 +288,22 @@ const CreateReel = ({ onClose, onReelCreated }) => {
                                             <span>{m.emoji}</span> {m.label}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+
+                            {/* Campus Mode Toggle */}
+                            <div className={`rounded-xl border p-3 transition-all duration-300 ${campusMode ? 'border-[#FF9933]/50 bg-[#FF9933]/5' : 'border-[#2A2850] bg-[#0B0A1A]'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[#EAEAF0] text-xs font-semibold flex items-center gap-1.5">🎓 Campus Mode</p>
+                                        <p className="text-[#6B6B85] text-[10px] mt-0.5">Auto-adds #campus #study — appears in Campus Reels</p>
+                                    </div>
+                                    <div
+                                        onClick={() => setCampusMode(!campusMode)}
+                                        className={`w-11 h-6 rounded-full cursor-pointer relative transition-colors duration-300 ${campusMode ? 'bg-gradient-to-r from-[#FF9933] to-[#C850C0]' : 'bg-[#2A2850]'}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${campusMode ? 'left-6' : 'left-1'}`} />
+                                    </div>
                                 </div>
                             </div>
                         </div>

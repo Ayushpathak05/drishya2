@@ -8,6 +8,20 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import CreateReel from './CreateReel';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
+// Campus tags — reels with these stay in Campus section only
+const CAMPUS_TAGS = [
+    '#study','#campus','#college','#university','#exam','#exams',
+    '#notes','#lecture','#lectures','#internship','#career','#job',
+    '#jobs','#hackathon','#collaborate','#collab','#teammate',
+    '#placement','#project','#research','#assignment','#homework',
+    '#semester','#syllabus','#cgpa','#coding','#competitive','#dsa',
+    '#opentowork','#opportunity','#workshop','#fest','#techfest',
+];
+const isCampusReel = (caption = '') => {
+    const lower = caption.toLowerCase();
+    return CAMPUS_TAGS.some(tag => lower.includes(tag));
+};
+
 // ─── Comment Sheet ────────────────────────────────────────────────────────────
 const CommentSheet = ({ reel, onClose, onAddComment }) => {
     const [text, setText] = useState('');
@@ -305,6 +319,8 @@ const ReelCard = ({ reel, isActive }) => {
 const ReelsPage = () => {
     const dispatch = useDispatch();
     const { reels } = useSelector(store => store.reel);
+    const { appMode } = useSelector(store => store.auth);
+    const isGrowthMode = appMode === 'growth';
     const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
     const [showCreate, setShowCreate] = useState(false);
@@ -319,7 +335,13 @@ const ReelsPage = () => {
                 { withCredentials: true }
             );
             if (res.data.success) {
-                dispatch(setReels(res.data.reels));
+                // Auto-filter by caption — same logic as posts:
+                // Growth mode → campus/study-tagged reels only
+                // For You    → normal reels only (no campus tags)
+                const filtered = isGrowthMode
+                    ? res.data.reels.filter(r => isCampusReel(r.caption))
+                    : res.data.reels.filter(r => !isCampusReel(r.caption));
+                dispatch(setReels(filtered));
             }
         } catch (e) {
             console.error(e);
@@ -327,7 +349,7 @@ const ReelsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [langPref, dispatch]);
+    }, [langPref, dispatch, isGrowthMode]);
 
     useEffect(() => { fetchReels(); }, [fetchReels]);
 

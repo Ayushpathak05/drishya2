@@ -41,10 +41,12 @@ const XPBar = ({ xp, level }) => {
 const ChallengeCard = ({ challenge, onComplete }) => {
     const [loading, setLoading] = useState(false);
     const [justCompleted, setJustCompleted] = useState(false);
+    const [verifyError, setVerifyError] = useState('');
     const done = challenge.completed || justCompleted;
 
     const handleComplete = async () => {
         if (done || loading) return;
+        setVerifyError('');
         setLoading(true);
         try {
             const res = await axios.post(
@@ -55,19 +57,22 @@ const ChallengeCard = ({ challenge, onComplete }) => {
             if (res.data.success) {
                 setJustCompleted(true);
                 onComplete(res.data);
-                toast.success(`${challenge.emoji} +${res.data.xpEarned} XP earned!`, {
-                    description: res.data.newBadges?.length > challenge.previousBadges?.length
-                        ? `🏅 New badge: ${res.data.newBadges[res.data.newBadges.length - 1]}`
-                        : undefined
-                });
+                toast.success(`${challenge.emoji} +${res.data.xpEarned} XP earned!`);
             }
         } catch (e) {
-            toast.error(e.response?.data?.message || 'Failed');
+            const msg = e.response?.data?.message || 'Failed';
+            if (e.response?.data?.notVerified) {
+                setVerifyError(msg);
+            } else {
+                toast.error(msg);
+            }
         } finally { setLoading(false); }
     };
 
+    const isPoll = challenge.type === 'poll';
+
     return (
-        <div className={`relative bg-[#1A1933] border rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${done ? 'border-green-500/30 opacity-70' : 'border-[#2A2850] hover:border-[#FF9933]/30'}`}>
+        <div className={`relative bg-[#1A1933] border rounded-2xl p-4 transition-all duration-300 hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${done ? 'border-green-500/30 opacity-70' : verifyError ? 'border-red-500/30' : 'border-[#2A2850] hover:border-[#FF9933]/30'}`}>
             {done && (
                 <div className="absolute top-3 right-3">
                     <CheckCircle2 className="w-5 h-5 text-green-400" />
@@ -78,19 +83,33 @@ const ChallengeCard = ({ challenge, onComplete }) => {
                 <div className="flex-1 min-w-0">
                     <p className="text-[#EAEAF0] font-bold text-sm">{challenge.title}</p>
                     <p className="text-[#A1A1B5] text-xs mt-0.5 leading-snug">{challenge.description}</p>
+                    {challenge.requiredTag && (
+                        <span className="inline-block mt-1.5 text-[10px] font-bold bg-[#FF9933]/10 border border-[#FF9933]/30 text-[#FF9933] px-2 py-0.5 rounded-full">
+                            Required: {challenge.requiredTag}
+                        </span>
+                    )}
+                    {verifyError && (
+                        <p className="text-red-400 text-[10px] mt-1.5 leading-snug">
+                            ⚠️ {verifyError}
+                        </p>
+                    )}
                     <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center gap-1 text-[#FF9933] text-xs font-bold bg-[#FF9933]/10 px-2.5 py-1 rounded-full">
                             <Zap className="w-3.5 h-3.5" />+{challenge.xpReward} XP
                         </div>
                         {done ? (
                             <span className="text-green-400 text-xs font-bold">✅ Done!</span>
+                        ) : isPoll ? (
+                            <span className="text-[#C850C0] text-xs font-semibold bg-[#C850C0]/10 px-3 py-1 rounded-full border border-[#C850C0]/30">
+                                🗳️ Auto on poll creation
+                            </span>
                         ) : (
                             <button
                                 onClick={handleComplete}
                                 disabled={loading}
                                 className="bg-gradient-to-r from-[#FF9933] to-[#C850C0] text-white text-xs font-bold px-4 py-1.5 rounded-full hover:brightness-110 transition-all disabled:opacity-50"
                             >
-                                {loading ? '...' : 'Mark Done'}
+                                {loading ? '...' : 'Claim XP'}
                             </button>
                         )}
                     </div>

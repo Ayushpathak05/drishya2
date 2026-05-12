@@ -1,4 +1,5 @@
 import { Poll } from "../models/poll.model.js";
+import { awardPollChallengeXP } from "./challenge.controller.js";
 
 // ─── Create Poll ──────────────────────────────────────────────────────────────
 export const createPoll = async (req, res) => {
@@ -17,6 +18,8 @@ export const createPoll = async (req, res) => {
             expiresAt: expiry,
         });
         await poll.populate({ path: 'author', select: 'username profilePicture college' });
+        // Auto-award XP for the poll challenge (only if not already done today)
+        await awardPollChallengeXP(req.id);
         return res.status(201).json({ success: true, message: 'Poll created!', poll });
     } catch (error) {
         console.error('[createPoll]', error);

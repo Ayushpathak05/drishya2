@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Heart, MessageCircle, Briefcase, Users, BarChart2, Plus, X, Clock, CheckCircle2, GraduationCap, ChevronDown } from 'lucide-react';
+import { Heart, MessageCircle, Briefcase, Users, BarChart2, Plus, X, Clock, CheckCircle2, GraduationCap, Music, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // ─── Trend of the Day ─────────────────────────────────────────────────────────
@@ -128,7 +128,13 @@ const CreatePollModal = ({ onClose, onCreate, college }) => {
                     <h3 className="text-[#EAEAF0] font-bold">🗳️ New Poll</h3>
                     <button onClick={onClose}><X className="w-5 h-5 text-[#A1A1B5] hover:text-[#EAEAF0]" /></button>
                 </div>
-                <input value={question} onChange={e => setQuestion(e.target.value)} placeholder="Ask something..." className="w-full bg-[#0B0A1A] text-[#EAEAF0] border border-[#2A2850] rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#C850C0] placeholder:text-[#6B6B85] mb-3 transition-colors" />
+                <textarea
+                    value={question}
+                    onChange={e => setQuestion(e.target.value)}
+                    placeholder={"Ask something...\n\nPress Enter for a new line."}
+                    rows={3}
+                    className="w-full bg-[#0B0A1A] text-[#EAEAF0] border border-[#2A2850] rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#C850C0] placeholder:text-[#6B6B85] mb-3 transition-colors resize-none leading-relaxed"
+                />
                 {options.map((opt, i) => (
                     <div key={i} className="flex gap-2 mb-2">
                         <input value={opt} onChange={e => { const o = [...options]; o[i] = e.target.value; setOptions(o); }} placeholder={`Option ${i + 1}`} className="flex-1 bg-[#0B0A1A] text-[#EAEAF0] border border-[#2A2850] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#C850C0] placeholder:text-[#6B6B85] transition-colors" />
@@ -155,8 +161,33 @@ const CreatePollModal = ({ onClose, onCreate, college }) => {
 };
 
 // ─── Main CampusPage ──────────────────────────────────────────────────────────
+const STUDY_TIPS = [
+    '📚 Use the Pomodoro technique: 25 min focus, 5 min break.',
+    '🧠 Teaching others is the fastest way to master a concept.',
+    '📝 Handwritten notes boost long-term memory vs typing.',
+    '💤 Sleep is when your brain consolidates what you studied.',
+    '🔇 Silence is 2× more effective than background music for retention.',
+    '📅 Spaced repetition beats cramming every single time.',
+    '🤝 Study groups work best when each person teaches one topic.',
+    '☀️ Morning study sessions align with peak cortisol and alertness.',
+];
+
+const CAMPUS_TAGS = [
+    '#study','#campus','#college','#university','#exam','#notes','#lecture',
+    '#internship','#career','#job','#hackathon','#collaborate','#collab',
+    '#teammate','#placement','#project','#research','#assignment','#homework',
+    '#semester','#cgpa','#coding','#competitive','#dsa','#opentowork',
+    '#opportunity','#workshop','#fest','#techfest',
+];
+
+const isCampusContent = (caption = '') => {
+    const lower = caption.toLowerCase();
+    return CAMPUS_TAGS.some(tag => lower.includes(tag));
+};
+
 const TABS = [
     { id: 'feed', label: 'Feed', icon: '🏠' },
+    { id: 'reels', label: 'Reels', icon: '🎬' },
     { id: 'career', label: 'Career', icon: '💼' },
     { id: 'polls', label: 'Polls', icon: '🗳️' },
     { id: 'collab', label: 'Collab', icon: '🤝' },
@@ -171,6 +202,9 @@ const CampusPage = () => {
     const [loading, setLoading] = useState(false);
     const [showPollModal, setShowPollModal] = useState(false);
     const [trendTags, setTrendTags] = useState([]);
+    const [campusReels, setCampusReels] = useState([]);
+    const [reelsLoading, setReelsLoading] = useState(false);
+    const [tipIndex, setTipIndex] = useState(0);
 
     const fetchCampusPosts = useCallback(async () => {
         setLoading(true);
@@ -198,11 +232,27 @@ const CampusPage = () => {
         } catch (e) { console.error(e); }
     }, []);
 
+    const fetchCampusReels = useCallback(async () => {
+        setReelsLoading(true);
+        try {
+            const res = await axios.get('http://localhost:3000/api/v1/user/campus/reels', { withCredentials: true });
+            if (res.data.success) setCampusReels(res.data.reels);
+        } catch (e) { console.error(e); }
+        finally { setReelsLoading(false); }
+    }, []);
+
     useEffect(() => {
         fetchCampusPosts();
         fetchPolls();
         fetchOpenToWork();
-    }, [fetchCampusPosts, fetchPolls, fetchOpenToWork]);
+        fetchCampusReels();
+    }, [fetchCampusPosts, fetchPolls, fetchOpenToWork, fetchCampusReels]);
+
+    // Rotate study tip every 60 seconds
+    useEffect(() => {
+        const t = setInterval(() => setTipIndex(i => (i + 1) % STUDY_TIPS.length), 60000);
+        return () => clearInterval(t);
+    }, []);
 
     const handleVote = async (pollId, optionIndex) => {
         try {
@@ -211,7 +261,8 @@ const CampusPage = () => {
         } catch { toast.error('Vote failed'); }
     };
 
-    const displayedPosts = posts;
+    // Client-side safety filter: only show campus-tagged posts
+    const displayedPosts = posts.filter(p => isCampusContent(p.caption));
 
     const collabPosts = posts.filter(p =>
         (p.caption || '').toLowerCase().includes('#collaborate') ||
@@ -277,18 +328,68 @@ const CampusPage = () => {
             {/* ── Feed Tab ── */}
             {activeTab === 'feed' && (
                 <div className="space-y-4">
+                    {/* Study Tip of the Hour */}
+                    <div className="bg-gradient-to-r from-[#1A1933] to-[#16152a] border border-[#C850C0]/20 rounded-2xl p-3 flex items-start gap-3">
+                        <span className="text-2xl mt-0.5">📚</span>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[#C850C0] text-[10px] font-bold uppercase tracking-wider mb-0.5">Study Tip of the Hour</p>
+                            <p className="text-[#EAEAF0] text-xs leading-relaxed">{STUDY_TIPS[tipIndex]}</p>
+                        </div>
+                    </div>
                     {loading ? (
                         <div className="flex justify-center py-16"><div className="w-8 h-8 rounded-full border-4 border-[#FF9933] border-t-transparent animate-spin" /></div>
                     ) : displayedPosts.length === 0 ? (
                         <div className="text-center py-16">
                             <GraduationCap className="w-12 h-12 mx-auto text-[#2A2850] mb-3" />
                             <p className="text-[#A1A1B5] text-sm">
-                                {user?.college ? 'No campus posts yet. Be the first!' : 'Set your college in Edit Profile to see campus posts.'}
+                                {user?.college ? 'No campus posts yet. Post with #study or #campus to appear here!' : 'Set your college in Edit Profile to see campus posts.'}
                             </p>
                             {!user?.college && <Link to="/account/edit" className="mt-3 inline-block text-[#FF9933] text-sm font-semibold hover:underline">Go to Edit Profile →</Link>}
                         </div>
                     ) : (
                         displayedPosts.map(post => <PostCard key={post._id} post={post} />)
+                    )}
+                </div>
+            )}
+
+            {/* ── Reels Tab ── */}
+            {activeTab === 'reels' && (
+                <div>
+                    <p className="text-[#A1A1B5] text-xs mb-3">Campus reels tagged with <span className="text-[#FF9933] font-semibold">#study</span>, <span className="text-[#FF9933] font-semibold">#campus</span> & more.</p>
+                    {reelsLoading ? (
+                        <div className="flex justify-center py-16"><div className="w-8 h-8 rounded-full border-4 border-[#FF9933] border-t-transparent animate-spin" /></div>
+                    ) : campusReels.length === 0 ? (
+                        <div className="text-center py-16">
+                            <Music className="w-12 h-12 mx-auto text-[#2A2850] mb-3" />
+                            <p className="text-[#A1A1B5] text-sm">No campus reels yet.</p>
+                            <p className="text-[#6B6B85] text-xs mt-1">Create a reel with Campus Mode 🎓 to appear here.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                            {campusReels.map(reel => (
+                                <div key={reel._id} className="relative rounded-2xl overflow-hidden bg-black border border-[#2A2850] hover:border-[#FF9933]/40 transition-all duration-300 group" style={{aspectRatio:'9/16', maxHeight:'240px'}}>
+                                    {reel.thumbnail ? (
+                                        <img src={reel.thumbnail} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <video src={reel.video} className="w-full h-full object-cover" muted />
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-2 left-2 right-2">
+                                        <p className="text-white text-[10px] font-bold truncate">@{reel.author?.username}</p>
+                                        {reel.caption && <p className="text-white/70 text-[9px] truncate">{reel.caption}</p>}
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-white/60 text-[9px] flex items-center gap-0.5"><Heart className="w-2.5 h-2.5" />{reel.likes?.length ?? 0}</span>
+                                            <span className="text-white/60 text-[9px] flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" />{reel.comments?.length ?? 0}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
             )}

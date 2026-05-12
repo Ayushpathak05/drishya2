@@ -187,7 +187,7 @@ const CreateStory = ({ onClose, onStoryCreated }) => {
                         <Button
                             onClick={handleSubmit}
                             disabled={!selectedFile || loading}
-                            className='bg-blue-500 hover:bg-blue-600'
+                            className='bg-gradient-to-r from-[#FF9933] to-[#C850C0] text-white font-semibold hover:brightness-110 transition-all disabled:opacity-50 shadow-[0_4px_20px_rgba(255,153,51,0.3)]'
                         >
                             {loading ? 'Creating...' : 'Share Story'}
                         </Button>

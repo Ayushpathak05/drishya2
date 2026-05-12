@@ -4,8 +4,24 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Post } from "../models/post.model.js";
+import { Reel } from "../models/reel.model.js";
 import { Notification } from "../models/notification.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
+
+// ─── Campus-relevant hashtags ─────────────────────────────────────────────────
+const CAMPUS_TAGS = [
+    '#study', '#campus', '#college', '#university', '#exam', '#exams',
+    '#notes', '#lecture', '#lectures', '#internship', '#career', '#job',
+    '#jobs', '#hackathon', '#collaborate', '#collab', '#teammate',
+    '#placement', '#project', '#research', '#assignment', '#homework',
+    '#semester', '#syllabus', '#cgpa', '#coding', '#competitive', '#dsa',
+    '#opentowork', '#opportunity', '#workshop', '#fest', '#techfest',
+];
+
+const isCampusContent = (caption = '') => {
+    const lower = caption.toLowerCase();
+    return CAMPUS_TAGS.some(tag => lower.includes(tag));
+};
 export const register = async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -264,7 +280,7 @@ export const searchUsers = async (req, res) => {
     }
 }
 
-// ─── Get Campus Posts (same college) ─────────────────────────────────────────
+// ─── Get Campus Posts (same college, campus-tagged only) ──────────────────────
 export const getCampusPosts = async (req, res) => {
     try {
         const userId = req.id;
@@ -272,16 +288,45 @@ export const getCampusPosts = async (req, res) => {
         if (!user?.college) {
             return res.status(200).json({ success: true, posts: [], message: 'Set your college in Edit Profile to see campus posts!' });
         }
-        const { Post } = await import('../models/post.model.js');
+        // Build a regex OR filter matching any campus tag in caption
+        const tagRegex = CAMPUS_TAGS.map(t => t.replace('#', '\\#')).join('|');
         const campusUsers = await User.find({ college: { $regex: user.college, $options: 'i' } }).select('_id');
         const campusUserIds = campusUsers.map(u => u._id);
-        const posts = await Post.find({ author: { $in: campusUserIds } })
+        const posts = await Post.find({
+            author: { $in: campusUserIds },
+            caption: { $regex: tagRegex, $options: 'i' },
+        })
             .sort({ createdAt: -1 })
             .populate({ path: 'author', select: 'username profilePicture college openToWork' })
             .populate({ path: 'comments', populate: { path: 'author', select: 'username profilePicture' } });
         return res.status(200).json({ success: true, posts });
     } catch (error) {
         console.error('[getCampusPosts]', error);
+        return res.status(500).json({ message: 'Server error', success: false });
+    }
+};
+
+// ─── Get Campus Reels (same college, campus-tagged only) ──────────────────────
+export const getCampusReels = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId).select('college');
+        if (!user?.college) {
+            return res.status(200).json({ success: true, reels: [], message: 'Set your college in Edit Profile.' });
+        }
+        const tagRegex = CAMPUS_TAGS.map(t => t.replace('#', '\\#')).join('|');
+        const campusUsers = await User.find({ college: { $regex: user.college, $options: 'i' } }).select('_id');
+        const campusUserIds = campusUsers.map(u => u._id);
+        const reels = await Reel.find({
+            author: { $in: campusUserIds },
+            caption: { $regex: tagRegex, $options: 'i' },
+        })
+            .sort({ createdAt: -1 })
+            .populate({ path: 'author', select: 'username profilePicture college' })
+            .populate({ path: 'comments', populate: { path: 'author', select: 'username profilePicture' } });
+        return res.status(200).json({ success: true, reels });
+    } catch (error) {
+        console.error('[getCampusReels]', error);
         return res.status(500).json({ message: 'Server error', success: false });
     }
 };
