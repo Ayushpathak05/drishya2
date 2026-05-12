@@ -26,21 +26,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
 const allowedOrigins = [
-    process.env.URL,                         // from .env (localhost dev or Vercel prod)
+    process.env.URL,                         // from Render env vars (set to your Vercel URL)
     'http://localhost:5173',                 // Vite local dev
     'http://localhost:3000',                 // fallback
-    'https://drishya2.vercel.app',           // Vercel production — update if your domain differs
+    'https://drishya-mu.vercel.app',         // Vercel production
 ].filter(Boolean);
 
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, Postman)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error(`CORS: ${origin} not allowed`));
-        }
+        // Allow any *.vercel.app subdomain (covers preview & production deployments)
+        if (origin.endsWith('.vercel.app')) return callback(null, true);
+        // Allow exact matches in the list
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        // Block everything else
+        console.warn(`CORS blocked: ${origin}`);
+        callback(new Error(`CORS: ${origin} not allowed`));
     },
     credentials: true,
 }
